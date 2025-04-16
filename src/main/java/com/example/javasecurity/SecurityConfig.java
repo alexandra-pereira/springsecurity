@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class WebConfig {
+public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -17,9 +17,17 @@ public class WebConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/hello/public").permitAll()
                         .requestMatchers("/hello/private").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults());
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/hello/private", true)
+                        .failureUrl("/hello/public")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login?logout")
+                );
 
         return http.build();
     }
