@@ -16,9 +16,11 @@ public class UserApp {
     @Column(unique = true)
     private String email;
     private String password;
+    private String role;
 
-    public UserApp(String email, String password)  {
+    public UserApp(String email, String password, String role)  {
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 }

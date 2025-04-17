@@ -19,18 +19,24 @@ public class CustomUserDetailsService implements UserDetailsService {
     public void createUser(String username, String rawPassword) {
         // encode le mot de passe avant de sauvegarder
         String encoded = passwordEncoder.encode(rawPassword);
-        repo.save(new UserApp(username, encoded));
+        repo.save(new UserApp(username, encoded,  "USER"));
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        var user = repo.findByEmail(email)
+        System.out.println("loadUserByUsername");
+        UserApp user = repo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return User.builder()
                 .username(user.getEmail())
                 // on passe directement le mot de passe déjà encodé en BDD
                 .password(user.getPassword())
-                .roles("USER")
+                .roles(user.getRole())
                 .build();
+    }
+
+    public void createAdmin(String username, String rawPassword) {
+        String encoded = passwordEncoder.encode(rawPassword);
+        repo.save(new UserApp(username, encoded,  "ADMIN"));
     }
 }

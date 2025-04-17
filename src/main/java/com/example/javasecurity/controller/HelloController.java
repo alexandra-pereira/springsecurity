@@ -18,5 +18,15 @@ public class HelloController {
         private String getPrivate(){
             return "Bienvenue, vous êtes bien authentifié·e.\";";
     }
+
+    @GetMapping("/user")
+        private String getUser(){
+            return "user";
+    }
+
+    @GetMapping("/admin")
+        private String getAdmin(){
+            return "admin";
+    }
 }
 
