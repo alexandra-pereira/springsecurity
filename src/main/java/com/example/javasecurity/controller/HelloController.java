@@ -16,7 +16,7 @@ public class HelloController {
 
     @GetMapping("/private")
         private String getPrivate(){
-            return "hello private";
+            return "Bienvenue, vous êtes bien authentifié·e.\";";
     }
 }
 

@@ -1,33 +1,57 @@
 package com.example.javasecurity;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import com.example.javasecurity.services.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Bean
+    public static PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                // CSRF désactivé (pour H2 console + POST /register)
+                .csrf(csrf -> csrf.disable())
+                // autorisations
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/hello/public").permitAll()
+                        .requestMatchers(
+                                "/hello/public",
+                                "/h2-console/**",
+                                "/login",
+                                "/register",
+                                "/user-app/register"
+                        ).permitAll()
                         .requestMatchers("/hello/private").authenticated()
                         .anyRequest().authenticated()
                 )
+                // form login
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/hello/private", true)
-                        .failureUrl("/hello/public")
+                        .failureUrl("/login?error")
                         .permitAll()
                 )
+
+                // logout
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
-                );
+                )
+                // pour autoriser l'affichage de la console H2 en iframe
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
